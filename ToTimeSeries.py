@@ -3,11 +3,11 @@ from InputReader import Simple_Input_Reader
 
 
 class ToTimeSeries:
-    def __init__(self, x_size, y_size, original_file, frame_count, single_frame_width, single_frame_height, **kwargs):
+    def __init__(self, bin_size, original_file, frame_count, single_frame_width, single_frame_height, **kwargs):
         """
         reads the file using the InputReader class.
         calculates the amount of bins in frame according the bin and frame dimensions.
-        :param x_size: the bin's x axis size
+        :param bin_size: the bin's x axis size
         :param y_size: the bin's y axis size
         :param kwargs: 'file_name': if you wish to load anything different than default file ('t1.avi'), 'channel_amount': if you use a different channel amount than [R,G,B]
         """
@@ -20,8 +20,8 @@ class ToTimeSeries:
         self.channel_amount = kwargs.get('channel_amount') if kwargs.get('channel_amount', None) else 3
 
         # self._input_reader = Simple_Input_Reader()
-        self.bin_x_size = x_size
-        self.bin_y_size = y_size
+        self.bin_x_size = bin_size
+        self.bin_y_size = bin_size
         self.bin_size = int(self.bin_x_size * self.bin_y_size)
         self.single_frame_size = int(self.single_frame_width * self.single_frame_height)
         self.number_of_bins = int(self.single_frame_size / self.bin_size)

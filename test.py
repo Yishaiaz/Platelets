@@ -1,7 +1,7 @@
 from ToTimeSeries import ToTimeSeries
 from SimpleVisualizationTool import simpleVisualization as sv
 
-tts = ToTimeSeries(x_size=90, y_size=90)
+tts = ToTimeSeries(bin_size=90, y_size=90)
 result = tts.into_time_series()
 bin_num = 3
 frame_num = 60
