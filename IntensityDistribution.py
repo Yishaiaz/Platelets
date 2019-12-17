@@ -220,7 +220,7 @@ class IntensityDistribution:
             start = time.time()
             single_channel_buf = buf[:, :, :, :1].copy()
             # converting the data into bins
-            ts = ts_main(x_size=self.BIN_SIZE, y_size=self.BIN_SIZE, original_file=single_channel_buf,
+            ts = ts_main(bin_size=self.BIN_SIZE, y_size=self.BIN_SIZE, original_file=single_channel_buf,
                          frame_count=self.FRAMES_IN_MEMORY, single_frame_width=frame_width, single_frame_height=frame_height,
                          channel_amount=1)
             buf_in_bins = ts.into_time_series()
