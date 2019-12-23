@@ -76,7 +76,7 @@ to_plot[:, 31:32] = 0
 # to_plot[0:2] = 0
 col_labels = []
 for i in range(0, len(ddot.DYNAMICS_RANGE)):
-    if i % 2 == 0:
+    if i % 3 == 0:
         col_labels.append(ddot.DYNAMICS_RANGE[i])
 row_labels = ["{0}".format(x * ddot.TIME_FRAME_SIZE) for x in range(0, ddot.number_of_time_frames)]
 sns.set()
