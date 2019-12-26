@@ -34,7 +34,7 @@ class ZeroCrossingRateFeature:
         if kwargs.get('use_zcr'):
             use_zcr = kwargs.get('use_zcr')
         else:
-            use_zcr = False
+            use_zcr = True
 
         if kwargs.get('function_to_use'):
             function_to_use = kwargs.get('function_to_use')
@@ -80,7 +80,7 @@ class ZeroCrossingRateFeature:
 
 sir = sir()
 zcr = ZeroCrossingRateFeature()
-vid_stack, frame_number, frame_width, frame_height = sir.input_to_np("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/PLT_coll4_exp.63_control_SP1.avi")
+vid_stack, frame_number, frame_width, frame_height = sir.input_to_np("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/PLT_coll4_exp.63_Mn2_PI_1.avi")
 # vid_stack, frame_number, frame_width, frame_height = sir.input_to_np("/Users/yishaiazabary/Desktop/University/FinalProject/videoes/IRM Artifact research videos and results/PLT_coll4_exp.63_control_BACKGROUND.avi")
 vid_stack_in_bins = zcr.split_into_bins(vid_stack, bin_size=5)
 # print(zcr.calc_zcr_per_bin(vid_stack_in_bins[0], 5))

@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from scipy import stats as scipy_stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 from ToTimeSeries import ToTimeSeries as tts
@@ -9,7 +10,7 @@ from InputReader import Simple_Input_Reader as sir
 class DynamicsDistributionOverTime:
 
     def __init__(self,  **kwargs):
-        if kwargs.get('time_frame_size'):
+        if kwargs.get('time_frame_size') is not None:
             time_frame_size = kwargs.get('time_frame_size')
         else:
             time_frame_size = 10
@@ -30,9 +31,22 @@ class DynamicsDistributionOverTime:
             deltas_between_current_frames = (time_frame_data[frame_ctr].flatten() - time_frame_data[frame_ctr + 1].flatten())#.flatten()
             # count appearance of each delta
             for delta_ctr in range(0, len(deltas_counters)):
-                deltas_counters[delta_ctr] += len(deltas_between_current_frames[deltas_between_current_frames == self.DYNAMICS_RANGE[delta_ctr]])
+                if self.DYNAMICS_RANGE[delta_ctr] != 0:
+                    deltas_counters[delta_ctr] += len(deltas_between_current_frames[deltas_between_current_frames == self.DYNAMICS_RANGE[delta_ctr]])
 
         # NORMALIZE DELTA COUNTERS
+        if kwargs.get('normalize') is not None:
+            normalize = kwargs.get('normalize')
+            if not normalize:
+                return deltas_counters
+        else:
+            normalize = None
+        if kwargs.get('z_score_normalize') is not None:
+            z_score_normalize = kwargs.get('z_score_normalize')
+            if z_score_normalize:
+                return  scipy_stats.zscore(deltas_counters)
+        else:
+            z_score_normalize = None
         if kwargs.get('normalize_by_max') is not None:
             normalize_by_max = kwargs.get('normalize_by_max')
         else:
@@ -60,7 +74,7 @@ class DynamicsDistributionOverTime:
             if time_frame_end_range > len(vid_stack):
                 time_frame_end_range = len(vid_stack)
             time_frame_array.append(vid_stack[time_frame_start_range: time_frame_end_range, :, :, 0].copy().astype('float'))
-            time_frame_end_range+=self.TIME_FRAME_SIZE
+            time_frame_end_range += self.TIME_FRAME_SIZE
             time_frame_start_range += self.TIME_FRAME_SIZE
 
         for time_frame_ctr in range(0, len(time_frame_array)):
@@ -69,10 +83,11 @@ class DynamicsDistributionOverTime:
         return time_frame_dynamics_distributions
 
 
-
+ax = plt.axes()
+FILENAME = "PLT_coll4_exp.63_MN_SP2.avi"
 ddot = DynamicsDistributionOverTime()
-to_plot = ddot.calc_dynamics_distribution("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/PLT_coll4_exp.63_control_SP1.avi", normalize_by_max=True)
-to_plot[:, 31:32] = 0
+to_plot = ddot.calc_dynamics_distribution("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/"+FILENAME, z_score_normalize=True)
+# to_plot[:, 31:32] = 0
 # to_plot[0:2] = 0
 col_labels = []
 for i in range(0, len(ddot.DYNAMICS_RANGE)):
@@ -80,10 +95,13 @@ for i in range(0, len(ddot.DYNAMICS_RANGE)):
         col_labels.append(ddot.DYNAMICS_RANGE[i])
 row_labels = ["{0}".format(x * ddot.TIME_FRAME_SIZE) for x in range(0, ddot.number_of_time_frames)]
 sns.set()
-ax = sns.heatmap(data=to_plot, vmax=0.1)
+ax = sns.heatmap(data=to_plot, vmax=0.2, ax=ax)
 ax.set_yticklabels(labels=row_labels, rotation=0)
 ax.set_xticklabels(labels=col_labels, rotation=45)
+ax.set(title='{0}'.format(FILENAME[:-4]), ylabel="Time", xlabel="UP <= ∂-I => DOWN")
 plt.show()
+figure = ax.get_figure()
+figure.savefig("Heatmaps/DynamicsOverTimeResultsZScoreNormalized/{0}_DynamicsOverTimeHeatmap.png".format(FILENAME[:-4]), dpi=200)
 
 
 
