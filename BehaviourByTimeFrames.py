@@ -1,4 +1,6 @@
 import math
+import os
+
 import numpy as np
 from scipy import stats as scipy_stats
 import matplotlib.pyplot as plt
@@ -13,7 +15,7 @@ class DynamicsDistributionOverTime:
         if kwargs.get('time_frame_size') is not None:
             time_frame_size = kwargs.get('time_frame_size')
         else:
-            time_frame_size = 10
+            time_frame_size = 5
         self.TIME_FRAME_SIZE = time_frame_size
         self.DYNAMICS_RANGE = np.linspace(-30, 30, 61)
 
@@ -82,26 +84,28 @@ class DynamicsDistributionOverTime:
 
         return time_frame_dynamics_distributions
 
+directory = os.fsencode("ForAnalyze")
 
-ax = plt.axes()
-FILENAME = "PLT_coll4_exp.63_MN_SP2.avi"
-ddot = DynamicsDistributionOverTime()
-to_plot = ddot.calc_dynamics_distribution("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/"+FILENAME, z_score_normalize=True)
-# to_plot[:, 31:32] = 0
-# to_plot[0:2] = 0
-col_labels = []
-for i in range(0, len(ddot.DYNAMICS_RANGE)):
-    if i % 3 == 0:
-        col_labels.append(ddot.DYNAMICS_RANGE[i])
-row_labels = ["{0}".format(x * ddot.TIME_FRAME_SIZE) for x in range(0, ddot.number_of_time_frames)]
-sns.set()
-ax = sns.heatmap(data=to_plot, vmax=0.2, ax=ax)
-ax.set_yticklabels(labels=row_labels, rotation=0)
-ax.set_xticklabels(labels=col_labels, rotation=45)
-ax.set(title='{0}'.format(FILENAME[:-4]), ylabel="Time", xlabel="UP <= ∂-I => DOWN")
-plt.show()
-figure = ax.get_figure()
-figure.savefig("Heatmaps/DynamicsOverTimeResultsZScoreNormalized/{0}_DynamicsOverTimeHeatmap.png".format(FILENAME[:-4]), dpi=200)
+for file in os.listdir(directory):
+    FILENAME = os.fsdecode(file)
+    if FILENAME == ".DS_Store":
+        continue
+    ax = plt.axes()
+    ddot = DynamicsDistributionOverTime(time_frame_size=10)
+    to_plot = ddot.calc_dynamics_distribution("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/"+FILENAME, z_score_normalize=False)
+    col_labels = []
+    for i in range(0, len(ddot.DYNAMICS_RANGE)):
+        if i % 3 == 0:
+            col_labels.append(ddot.DYNAMICS_RANGE[i])
+    row_labels = ["{0}".format(x * ddot.TIME_FRAME_SIZE) for x in range(0, ddot.number_of_time_frames)]
+    sns.set()
+    ax = sns.heatmap(data=to_plot, vmax=0.2, ax=ax)
+    ax.set_yticklabels(labels=row_labels, rotation=0)
+    ax.set_xticklabels(labels=col_labels, rotation=45)
+    ax.set(title='{0}'.format(FILENAME[:-4]), ylabel="Time", xlabel="UP <= ∂-I => DOWN")
+    plt.show()
+    figure = ax.get_figure()
+    figure.savefig("Heatmaps/DynamicsOverTimeResults/{0}_DynamicsOverTimeHeatmap.png".format(FILENAME[:-4]), dpi=200)
 
 
 
