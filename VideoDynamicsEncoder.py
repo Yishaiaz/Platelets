@@ -9,17 +9,27 @@ class videoDynamicsEncoder:
 
     def __init__(self, color_scheme1: np.array = [], color_scheme2: np.array = []):
         pass
-    def manipulate_frame(self, buf:np.ndarray):
+
+    def manipulate_frame(self, buf:np.ndarray, **kwargs):
         """
         colors are [Blue,Green,Red]
         :param buf:
         :return:
         """
+        if kwargs.get('color') is not None:
+            color = kwargs.get('color')
+        else:
+            color = [240, 0, 0]
+        if kwargs.get('limit') is not None:
+            limit = kwargs.get('limit')
+        else:
+            limit = -9
+
         dynamics = buf[0]-buf[1]
-        buf[0] = np.where(dynamics >= -9, buf[0], [240,0 ,0])
+        buf[0] = np.where(dynamics >= limit, buf[0], color)
         return buf
 
-    def manipulate_video(self, video_path: str, manipulated_video_path, condition):
+    def manipulate_video(self, video_path: str, manipulated_video_path, condition, **kwargs):
         """
         condition is a function type object that receives pixel
         dynamic value (current_value-next_frame_value),current pixel time, current intensity.
@@ -58,7 +68,7 @@ class videoDynamicsEncoder:
                     buf[in_memory_frames_ctr] = frame
                     fc += 1
                 in_memory_frames_ctr += 1
-            buf = condition(buf)
+            buf = condition(buf, **kwargs)
             im = np.uint8(buf[0])
             out.write(im)
             # cv2.imshow("test", np.array(im, dtype=np.uint8))
@@ -80,7 +90,6 @@ if __name__ == "__main__":
     videoDynamicsEncoder = videoDynamicsEncoder()
     for file in os.listdir(main_directory):
         file_name = os.fsdecode(file)
-        if file_name.__contains__("PLT"):
-            videoDynamicsEncoder.manipulate_video("ForAnalyze/"+file_name, "videos/suspicious_dynamics_videoes/"+file_name,videoDynamicsEncoder.manipulate_frame)
+        if file_name.__contains__("PRP"):
+            videoDynamicsEncoder.manipulate_video("ForAnalyze/"+file_name, "videos/suspicious_dynamics_videoes/"+file_name,videoDynamicsEncoder.manipulate_frame, limit=-12)
 
-# 
