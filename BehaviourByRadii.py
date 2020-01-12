@@ -89,7 +89,7 @@ class DynamicsDistributionOverRadii:
 
 
 ax = plt.axes()
-FILENAME = "PLT_coll4_exp.63_MN_SP2.avi"
+FILENAME = "PRP_FBG_exp.63_Mn2_at15min_SP2.avi"
 ddot = DynamicsDistributionOverRadii()
 to_plot = ddot.calc_dynamics_distribution("/Users/yishaiazabary/PycharmProjects/platelets/ForAnalyze/"+FILENAME, z_score_normalize=True)
 # to_plot[:, 31:32] = 0
