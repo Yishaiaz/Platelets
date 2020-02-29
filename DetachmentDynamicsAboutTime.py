@@ -7,6 +7,7 @@ from matplotlib import rcParams
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+
 class DetachmentDynamicsAboutTime:
 
     def __init__(self, **kwargs):
@@ -23,12 +24,22 @@ class DetachmentDynamicsAboutTime:
             self.smoothing_enabled = kwargs.get('smoothing_enabled')
         else:
             self.smoothing_enabled = (True, 12)
+
+        if kwargs.get('calc_attachments') is not None:
+            self.calc_attachments = kwargs.get('calc_attachments')
+        else:
+            self.calc_attachments = False
         self.DYNAMICS_RANGE = np.linspace(-30, 30, 61)
+
 
     def get_number_of_event(self, dynamics_matrix: np.ndarray):
         detachment_event = dynamics_matrix[dynamics_matrix >= self.threshold_for_events]
         attachment_event = dynamics_matrix[dynamics_matrix < -1 * self.threshold_for_events]
-        return len(detachment_event) / (len(detachment_event) + len(attachment_event)) if len(attachment_event)>0 else 0
+        if self.calc_attachments:
+            return len(attachment_event) / (len(detachment_event) + len(attachment_event)) if len(
+                attachment_event) > 0 else 0
+        else:
+            return len(detachment_event) / (len(detachment_event) + len(attachment_event)) if len(attachment_event)>0 else 0
 
     def count_detachment_events(self, video_path: str, **kwargs):
         # reading the file
@@ -126,15 +137,90 @@ class DetachmentDynamicsAboutTime:
         y = np.concatenate((firstvals, y, lastvals))
         return np.convolve(m[::-1], y, mode='valid')
 
+    def single_signal_plot(self, to_plot: np.ndarray):
+        fig, ax = plt.subplots()
+        # to_plot = only_prp_arrays[idx]
+        time_intervals = np.linspace(0, len(to_plot) / 7, len(to_plot))
+        ax.set(title='A single platelet on fibrinogen')
+        ax.plot(time_intervals, to_plot)
+        # ax.plot([0,14], [0.5,0.5], )
+        plt.yticks(np.arange(0, 1.1, step=0.1), [str(int(x * 10) / 10) for x in np.arange(0, 1.1, step=0.1)])
+        ax.set_xlabel("time (sec)", fontsize=5)
+        ax.set_ylabel("#Detachment Events/ # All Evenets", fontsize=5)
+        ax.grid()
+        plt.show()
+        # fig.savefig("for Bennys.png", dpi=300)
+
+    def combined_plots_for_substrates(self, first_type_arrays: np.ndarray, second_type_arrays: np.ndarray):
+        """
+
+        :param first_type_arrays: a 2D array, each row is a different signal of a platelet spreading process.
+        :param second_type_arrays: a 2D array, each row is a different signal of a platelet spreading process.
+        :return:
+        """
+        ylim = (0, 1)
+        fig, axis = plt.subplots(2, 1)
+        for i, val in enumerate(first_type_arrays):
+            time_intervals = np.linspace(0,len(val)/7, len(val))
+            axis[0].plot(time_intervals, val)
+            axis[0].set_xlabel("time (sec)", fontsize=8)
+            axis[0].set_ylabel("#Detachment Events/ # All Evenets", fontsize=6)
+        for i, val in  enumerate(second_type_arrays):
+            time_intervals = np.linspace(0,len(val)/7, len(val))
+            axis[1].plot(time_intervals, val)
+            axis[1].set_xlabel("time (sec)", fontsize=8)
+            axis[1].set_ylabel("#Detachment Events/ # All Evenets", fontsize=6)
+        plt.setp(axis, ylim=ylim)
+        plt.tight_layout()
+        plt.show()
+        # fig.savefig("DetachmentEventPlots/ConcentratedPlotsBySubstrate.png", dpi=300, bbox_inches="tight")
+
+    def combined_plots_for_substrates_outlier_events(self, to_plot: np.ndarray):
+        """
+
+        :param to_plot: a 2D array, each row is a different signal of a platelet spreading process.
+        :return:
+        """
+        ylim = (0, 15)
+        fig, ax = plt.subplots()
+        for i, val in enumerate(to_plot):
+            # take the last 15% of a signal
+            percent_of_last_frames = 0.85
+            last_frames = val[int(len(val) * percent_of_last_frames):]
+            rest_of_frames = val[:int(len(val) * percent_of_last_frames)]
+            last_frames_mean = np.mean(last_frames)
+            last_frames_std = np.std(last_frames)
+            # for each 10 frames, count the number of events beyond mean+-std
+            results = np.zeros(shape=(int(len(rest_of_frames) / 10) - 1), dtype=int)
+            for frame_iterator in range(0, int(len(rest_of_frames) / 10) - 1):
+                frames_to_count = rest_of_frames[frame_iterator * 10:(frame_iterator + 1) * 10]
+                mask = (frames_to_count > (last_frames_mean + last_frames_std)) | (
+                            frames_to_count < (last_frames_mean - last_frames_std))
+                number_of_outlier_events = len(frames_to_count[mask])
+                results[frame_iterator] = number_of_outlier_events
+            # plot the results
+            t = np.linspace(0, len(results), len(results))
+            ax.plot(t, results, 'o', label='{} {}'.format(i, 'FBR'))
+            ax.set_xlabel('time (frame No. /10)')
+            ax.set_ylabel('number of outlier events')
+        # show plot
+        ax.set(title='number of outlier events')
+        ax.grid()
+        plt.setp(ax, ylim=ylim)
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+        # fig.savefig('for_benny.png', dpi=300)
+
 
 if __name__=="__main__":
     sns.set(style="ticks")
     nrows = 3
-    ncols = 3
+    ncols = 2
     fig, axis = plt.subplots(nrows=nrows, ncols=ncols, sharey='all')
     directory_name = "ForAnalyze"
     directory = os.fsencode(directory_name)
-    dda = DetachmentDynamicsAboutTime(threshold_for_events=12, smoothing_enabled=(True, 17))
+    dda = DetachmentDynamicsAboutTime(threshold_for_events=12, smoothing_enabled=(True, 17), calc_attachments=False)
     detachment_distributions_array = list()
     detachment_distributions_array_FBR = list()
     detachment_distributions_array_COLL = list()
@@ -155,7 +241,7 @@ if __name__=="__main__":
             continue
 
         detachment_distributions_array.append(video_detachment_distribution_about_time)
-        file_names_list.append(filename[:-4])
+        file_names_list.append(filename[:filename.find(' .avi')-2])
         video_length_list_in_seconds.append(len(video_detachment_distribution_about_time)/7) # fps = 7 in all samples
     # fig, ax = plt.subplots()
     # barplot1 = ax.boxplot(box_plots_data, vert=True, patch_artist=True, labels=file_names_list)
@@ -170,18 +256,20 @@ if __name__=="__main__":
     # fig.savefig("DetachmentEventPlots/AllVideosBoxPlot.png", dpi=300, bbox_inches="tight")
     # plt.tight_layout()
     # plt.show()
-        if filename.__contains__("FBG"):
+        if filename.__contains__("PRP"):
             detachment_distributions_array_FBR.append(video_detachment_distribution_about_time)
-        elif filename.__contains__("coll"):
+        elif filename.__contains__("COLLAGEN4"):
             detachment_distributions_array_COLL.append(video_detachment_distribution_about_time)
 
-    row_ctr = 0
-    col_ctr = 0
-    detachment_distributions_array = np.array(detachment_distributions_array)
+    # row_ctr = 0
+    # col_ctr = 0
+    # ylim = (0, 1)
+    # detachment_distributions_array = np.array(detachment_distributions_array)
     # for i, val in enumerate(detachment_distributions_array):
     #     if row_ctr - nrows >= 0:
     #         row_ctr = 0
     #         col_ctr += 1
+    #
     #     axis[row_ctr][col_ctr].plot(np.linspace(0, video_length_list_in_seconds[i], len(val)), val)
     #     axis[row_ctr][col_ctr].set(title='{}'.format(file_names_list[i].replace('_', ' ', -1)))
     #     axis[row_ctr][col_ctr].grid()
@@ -192,11 +280,20 @@ if __name__=="__main__":
     #     if row_ctr == nrows - 1:
     #         axis[row_ctr][col_ctr].set_xlabel("time (sec)", fontsize=4)
     #     row_ctr += 1
-
-    plt.tight_layout()
-    plt.show()
+    # plt.setp(axis, ylim=ylim)
+    # plt.tight_layout()
+    # plt.show()
     # fig.savefig("DetachmentEventPlots/AllVideosBoxedPlots.png", dpi=300, bbox_inches="tight")
-    np.save("allDetachmentArrays", np.array(detachment_distributions_array))
-    np.save("PRPDetachmentArrays", np.array(detachment_distributions_array_FBR))
-    np.save("COLLDetachmentArrays", np.array(detachment_distributions_array_COLL))
-
+    # np.save("allAttachmentArrays", np.array(detachment_distributions_array))
+    # np.save("PRPAttachmentArrays", np.array(detachment_distributions_array_FBR))
+    # np.save("PRPNoiseAttachmentArrays", np.array(detachment_distributions_array_FBR))
+    # np.save("COLLAttachmentArrays", np.array(detachment_distributions_array_COLL))
+    # np.save("allDetachmentArrays", np.array(detachment_distributions_array))
+    # np.save("PRPDetachmentArrays", np.array(detachment_distributions_array_FBR))
+    np.save("PRPNoiseDetachmentArrays", np.array(detachment_distributions_array_FBR))
+    # np.save("COLLDetachmentArrays", np.array(detachment_distributions_array_COLL))
+    # np.save("COLLBACKGROUNDArrays", np.array(detachment_distributions_array))
+    # np.save("FibrinogenActingLikeCollagenAttachment", np.array(detachment_distributions_array))
+    # np.save("FibrinogenActingLikeCollagenDetachment", np.array(detachment_distributions_array))
+    # np.save("tempPRPDetachmentArrays", np.array(detachment_distributions_array))
+    # np.save("tempCOLLDetachmentArrays", np.array(detachment_distributions_array))
