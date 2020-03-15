@@ -1,9 +1,9 @@
 import os
 from math import factorial
-import pandas as pd
+# import pandas as pd
 import numpy as np
 import cv2
-from matplotlib import rcParams
+# from matplotlib import rcParams
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -41,7 +41,7 @@ class DetachmentDynamicsAboutTime:
         else:
             return len(detachment_event) / (len(detachment_event) + len(attachment_event)) if len(attachment_event)>0 else 0
 
-    def count_detachment_events(self, video_path: str, **kwargs):
+    def count_detachment_events(self, video_path: str):
         # reading the file
         video_cap = cv2.VideoCapture(video_path)
         final_frame_count = int(video_cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -218,9 +218,9 @@ if __name__=="__main__":
     nrows = 3
     ncols = 2
     fig, axis = plt.subplots(nrows=nrows, ncols=ncols, sharey='all')
-    directory_name = "ForAnalyze"
+    directory_name = "ForAnalyze/Final"
     directory = os.fsencode(directory_name)
-    dda = DetachmentDynamicsAboutTime(threshold_for_events=12, smoothing_enabled=(True, 17), calc_attachments=False)
+    dda = DetachmentDynamicsAboutTime(threshold_for_events=12, smoothing_enabled=(True, 17), calc_attachments=True)
     detachment_distributions_array = list()
     detachment_distributions_array_FBR = list()
     detachment_distributions_array_COLL = list()
@@ -284,16 +284,17 @@ if __name__=="__main__":
     # plt.tight_layout()
     # plt.show()
     # fig.savefig("DetachmentEventPlots/AllVideosBoxedPlots.png", dpi=300, bbox_inches="tight")
-    # np.save("allAttachmentArrays", np.array(detachment_distributions_array))
+    np.save("allAttachmentArrays", np.array(detachment_distributions_array))
     # np.save("PRPAttachmentArrays", np.array(detachment_distributions_array_FBR))
     # np.save("PRPNoiseAttachmentArrays", np.array(detachment_distributions_array_FBR))
     # np.save("COLLAttachmentArrays", np.array(detachment_distributions_array_COLL))
     # np.save("allDetachmentArrays", np.array(detachment_distributions_array))
     # np.save("PRPDetachmentArrays", np.array(detachment_distributions_array_FBR))
-    np.save("PRPNoiseDetachmentArrays", np.array(detachment_distributions_array_FBR))
+    # np.save("PRPNoiseDetachmentArrays", np.array(detachment_distributions_array_FBR))
     # np.save("COLLDetachmentArrays", np.array(detachment_distributions_array_COLL))
     # np.save("COLLBACKGROUNDArrays", np.array(detachment_distributions_array))
     # np.save("FibrinogenActingLikeCollagenAttachment", np.array(detachment_distributions_array))
     # np.save("FibrinogenActingLikeCollagenDetachment", np.array(detachment_distributions_array))
     # np.save("tempPRPDetachmentArrays", np.array(detachment_distributions_array))
     # np.save("tempCOLLDetachmentArrays", np.array(detachment_distributions_array))
+    # DetachmentDynamicsAboutTime().single_signal_plot()

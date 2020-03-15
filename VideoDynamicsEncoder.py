@@ -4,26 +4,51 @@ import time as time
 import cv2
 
 TEST_FILE_NAME = "exp89_PRP_FBG_CONTROL01_R3D_SP1.avi"
-attach_color_scheme = np.array([[0, 0, 240],   [1, 1, 230],
-                                [2, 2, 220],   [3, 3, 210],
-                                [4, 4, 200],   [5, 5, 190],
-                                [6, 6, 180],   [7, 7, 170],
-                                [8, 8, 160],   [9, 9, 150],
-                                [10, 10, 140], [11, 11, 130],
-                                [12, 12, 120], [13, 13, 110],
-                                [14, 14, 100], [15, 15, 90],
-                                [16, 16, 80],  [17, 17, 70],
+
+
+# attach_color_scheme = np.array([[0, 0, 240],   [1, 1, 230],
+#                                 [2, 2, 220],   [3, 3, 210],
+#                                 [4, 4, 200],   [5, 5, 190],
+#                                 [6, 6, 180],   [7, 7, 170],
+#                                 [8, 8, 160],   [9, 9, 150],
+#                                 [10, 10, 140], [11, 11, 130],
+#                                 [12, 12, 120], [13, 13, 110],
+#                                 [14, 14, 100], [15, 15, 90],
+#                                 [16, 16, 80],  [17, 17, 70],
+#                                 ])
+# detach_color_scheme = np.array([[240, 0, 0],   [230, 1, 1],
+#                                 [220, 2, 2],  [210, 3, 3],
+#                                 [200, 4, 4],  [190, 5, 5],
+#                                 [180, 6, 6],  [170, 7, 7],
+#                                 [160, 8, 8],  [150, 9, 9],
+#                                 [140, 10, 10], [130, 11, 11],
+#                                 [120, 12, 12], [110, 13, 13],
+#                                 [100, 14, 14], [90,  15, 15],
+#                                 [80,  16, 16], [70,  17, 17],
+#                                 ])
+
+attach_color_scheme = np.array([[0, 0, 250],   [0, 0, 250],
+                                [0, 0, 250],   [0, 0, 250],
+                                [0, 0, 250],   [0, 0, 250],
+                                [0, 0, 250],   [0, 0, 250],
+                                [0, 0, 250],   [0, 0, 250],
+                                [0, 0, 250], [0, 0, 250],
+                                [0, 0, 250], [0, 0, 250],
+                                [0, 0, 250], [0, 0, 250],
+                                [0, 0, 250],  [0, 0, 250],
                                 ])
-detach_color_scheme = np.array([[240, 0, 0],   [230, 1, 1],
-                                [220, 2, 2],  [210, 3, 3],
-                                [200, 4, 4],  [190, 5, 5],
-                                [180, 6, 6],  [170, 7, 7],
-                                [160, 8, 8],  [150, 9, 9],
-                                [140, 10, 10], [130, 11, 11],
-                                [120, 12, 12], [110, 13, 13],
-                                [100, 14, 14], [90,  15, 15],
-                                [80,  16, 16], [70,  17, 17],
+detach_color_scheme = np.array([[250, 0, 0],   [250, 0, 0],
+                                [250, 0, 0],  [250, 0, 0],
+                                [250, 0, 0],  [250, 0, 0],
+                                [250, 0, 0],  [250, 0, 0],
+                                [250, 0, 0],  [250, 0, 0],
+                                [250, 0, 0], [250, 0, 0],
+                                [250, 0, 0], [250, 0, 0],
+                                [250, 0, 0], [250,  0, 0],
+                                [250,  0, 0], [250,  0, 0],
                                 ])
+
+
 
 # attach_color_scheme = np.array([[0, 0, 240],   [10, 1, 230],
 #                                 [20, 2, 220],   [30, 3, 210],
@@ -162,15 +187,15 @@ class videoDynamicsEncoder:
 if __name__ == "__main__":
     # color_scheme1 = np.array(['#FFA500'])
     # color_scheme2 = np.array(['#0000FF'])
-    main_directory = os.fsencode("ForAnalyze")
+    main_directory = os.fsencode("ForAnalyze/Final/")
     videoDynamicsEncoder = videoDynamicsEncoder(attach_color_scheme, detach_color_scheme)
     for file in os.listdir(main_directory):
         file_name = os.fsdecode(file)
         if file_name.__contains__("avi"):
-            if file_name.__contains__("FIB"):
-                videoDynamicsEncoder.manipulate_video("ForAnalyze/" + file_name,
+            if file_name.__contains__("asdf"):
+                videoDynamicsEncoder.manipulate_video("ForAnalyze/Final/" + file_name,
                                                       "videos/suspicious_dynamics_videoes/" + file_name,
                                                       videoDynamicsEncoder.manipulate_frame, limit=-14)
             else:
-                videoDynamicsEncoder.manipulate_video("ForAnalyze/"+file_name, "videos/suspicious_dynamics_videoes/"+file_name,videoDynamicsEncoder.manipulate_frame, limit=-12)
+                videoDynamicsEncoder.manipulate_video("ForAnalyze/Final/"+file_name, "ForAnalyze/temp/"+file_name, videoDynamicsEncoder.manipulate_frame, limit=-12)
 
